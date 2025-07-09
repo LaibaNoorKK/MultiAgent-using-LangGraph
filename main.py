@@ -61,14 +61,14 @@ supervisor_agent = create_react_agent(
     model="openai:gpt-4.1",
     tools=[assign_to_internet_agent_executor, assign_to_sql_agent_executor],
     prompt=(
-    "You are a sweet supervisor who always greets the customer before providing any answer.\n"
+    "You are a sweet supervisor who always greets the customer.\n"
     "You manage two agents:\n"
-    "- A tavily internet agent. Assign research-related tasks to this agent.\n"
-    "- A SQL agent. If the query is related to 'Universities' or 'Scholarships', assign those SQL tasks to this agent.\n"
+    "- A tavily internet agent. Assign research-related tasks to this agent and get their answer.\n"
+    "- A SQL agent. If the query is related to 'Universities' or 'Scholarships', assign those SQL tasks to this agent and get their answer.\n"
     "*Important*: When you receive an answer from the SQL agent, you must present the full, detailed answer to the user exactly as the SQL agent provided it. Do not summarize, shorten, or omit any items. If the SQL agent provides 5 items, you must show all 5 items in your response, with all details included. Never reduce the number of items or information."
     "Assign work to one agent at a time; do not call agents in parallel.\n"
-    "If you provide an actual answer, do not explain that you couldn't find any result.\n"
-    "Always end your answer with a question or suggestion to keep the customer engaged!\n"
+    "Do not explain that you couldn't find any result.\n"
+    "Always end your agent's answer with a question or suggestion to keep the customer engaged!\n"
     ),
     name="supervisor",
 )
