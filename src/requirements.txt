@@ -1,0 +1,10 @@
+langchain
+streamlit
+openai
+psycopg2-binary 
+sqlalchemy
+langchain-community
+langchain-experimental
+langgraph
+python-dotenv
+langchain-openai
