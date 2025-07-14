@@ -77,10 +77,10 @@ supervisor_agent = create_react_agent(
         "📋 Protocols:\n"
         "- Always assign work to ONE agent at a time.\n"
         "- When SQL Agent responds, present the FULL answer with ALL items intact. No shortening, paraphrasing, or item reduction is allowed.\n"
-        "- Always end responses with a follow-up question or suggestion to keep engagement flowing.\n"
+        "- Always end responses with some tips if applicable, and a follow-up question or suggestion to keep engagement flowing.\n"
         "- Never say 'no result found'. Instead, continue engaging.\n"
         "- If you respond directly, provide specific Malaysian study-related data only.\n"
-        "- Always include the source URL unless already embedded in the returned data.\n"
+        "- *Important*: Always include the source URL unless already embedded in the returned data.\n"
     ),
     name="supervisor",
 )
