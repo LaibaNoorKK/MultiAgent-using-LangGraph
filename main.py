@@ -2,7 +2,6 @@
 import os
 import streamlit as st
 import pandas as pd
-from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langchain.chains.conversation.memory import ConversationEntityMemory
 from langchain_core.messages import HumanMessage, AIMessage
@@ -32,7 +31,7 @@ def create_handoff_tool(*, agent_name: str, description: str | None = None):
     ) -> Command:
         tool_message = {
             "role": "tool",
-            "content": f"Successfully transferred to {agent_name}",""
+            "content": f"Successfully transferred to {agent_name}",
             "name": name,
             "tool_call_id": tool_call_id,
         }
@@ -56,34 +55,46 @@ assign_to_sql_agent_executor = create_handoff_tool(
     description="Assign task to a sql agent executor.",
 )
 
-
 supervisor_agent = create_react_agent(
     model="openai:gpt-4.1",
-    tools=[assign_to_internet_agent_executor, assign_to_sql_agent_executor],
+    tools=[assign_to_sql_agent_executor, assign_to_internet_agent_executor],
     prompt=(
-    "You are a sweet supervisor who always greets the customer.\n"
-    "You manage two agents:\n"
-    "- A tavily internet agent. Assign research-related tasks to this agent and get their answer.\n"
-    "- A SQL agent. If the query is related to 'Universities' or 'Scholarships', assign those SQL tasks to this agent and get their answer.\n"
-    "*Important*: When you receive an answer from the SQL agent, you must present the full, detailed answer to the user exactly as the SQL agent provided it. Do not summarize, shorten, or omit any items. If the SQL agent provides 5 items, you must show all 5 items in your response, with all details included. Never reduce the number of items or information."
-    "Assign work to one agent at a time; do not call agents in parallel.\n"
-    "Do not explain that you couldn't find any result.\n"
-    "Always end your agent's answer with a question or suggestion to keep the customer engaged!\n"
+        "🎓 You are Malaysia's Supervisor AI Agent. Your role is to assist students with queries strictly related to studying in Malaysia. You must always begin interactions with a friendly greeting.\n\n"
+        "🚫 You may NOT respond to any question unless it specifically concerns Malaysian education, student life, or Malaysian culture in a study-related context.\n\n"
+        "🤖 You manage two agents and assign tasks one-at-a-time:\n"
+        "1️⃣ SQL Agent: Handles queries related to these database tables ONLY:\n"
+        "   - Scholarships\n"
+        "   - Universities\n"
+        "   - VisaInfo\n"
+        "   - Ranking\n"
+        "   - Programs\n"
+        "   - HealthInsurance\n"
+        "   - Eligibility\n"
+        "   - DocumentsRequired\n"
+        "   - Admissions\n"
+        "   If SQL agent fails, escalate to Internet Research Agent.\n\n"
+        "2️⃣ Internet Research Agent: Conducts web-based searches to gather responses.\n\n"
+        "📋 Protocols:\n"
+        "- Always assign work to ONE agent at a time.\n"
+        "- When SQL Agent responds, present the FULL answer with ALL items intact. No shortening, paraphrasing, or item reduction is allowed.\n"
+        "- Always end responses with a follow-up question or suggestion to keep engagement flowing.\n"
+        "- Never say 'no result found'. Instead, continue engaging.\n"
+        "- If you respond directly, provide specific Malaysian study-related data only.\n"
+        "- Always include the source URL unless already embedded in the returned data.\n"
     ),
     name="supervisor",
 )
+
 
 from langgraph.graph import END
 
 # Define the multi-agent supervisor graph
 supervisor = (
     StateGraph(MessagesState)
-    # NOTE: `destinations` is only needed for visualization and doesn't affect runtime behavior
     .add_node(supervisor_agent, destinations=("internet_agent", "sql_agent", END))
     .add_node("internet_agent", internet_agent_executor)
     .add_node("sql_agent", sql_agent)
     .add_edge(START, "supervisor")
-    # always return back to the supervisor
     .add_edge("internet_agent", "supervisor")
     .add_edge("sql_agent", "supervisor")
     .compile()
@@ -120,25 +131,19 @@ def new_chat():
     st.session_state['message_history'] = []
 
 # --- UI Setup ---
-st.set_page_config(page_title="AI Super Search")
-st.title("🔍 AI Super Search")
+st.set_page_config(page_title="AI Super Search Malaysia")
+st.title("🔍 AI Super Search Malaysia")
 
 # New Chat button
 st.sidebar.button("New Chat", on_click=new_chat, type="primary")
 
-# --- Input Box ---
-input_text = st.text_input("You:", st.session_state['input'], key='input',
-                           placeholder="Ask about scholarships, universities, or anything on the web...",
-                           label_visibility='hidden')
 
 def run_supervisor(input_text):
     st.session_state["message_history"].append(HumanMessage(content=input_text))
     input_state = MessagesState(messages=st.session_state["message_history"])
     outputs = list(supervisor.stream(input_state))
-    # Extract the latest AIMessage from the supervisor node
     last_output = outputs[-1] if outputs else {}
     messages = last_output.get("supervisor", {}).get("messages", [])
-    # Find the last AIMessage with content
     for msg in reversed(messages):
         if hasattr(msg, "content") and msg.content:
             st.session_state["message_history"].append(msg)
@@ -147,14 +152,23 @@ def run_supervisor(input_text):
 
 
 # --- Handle Input ---
-if input_text:
-    with st.spinner("Processing..."):
-        output = run_supervisor(input_text)
-        st.session_state['past'].append(input_text)
-        st.session_state['generated'].append(output)
 
-# --- Chat History ---
-with st.expander("Conversation History"):
-    for i in range(len(st.session_state['generated']) - 1, -1, -1):
-        st.info(f"**User:** {st.session_state['past'][i]}")
-        st.success(f"**AI:** {st.session_state['generated'][i]}")
+# Display previous messages in chat format
+for i in range(len(st.session_state['generated'])):
+    with st.chat_message("user"):
+        st.markdown(st.session_state['past'][i])
+    with st.chat_message("assistant"):
+        st.markdown(st.session_state['generated'][i])
+
+# --- Input Box (chat style) ---
+if prompt := st.chat_input("Ask about scholarships, universities, or anything on the web..."):
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.spinner("Processing..."):
+        response = run_supervisor(prompt)
+        st.session_state['past'].append(prompt)
+        st.session_state['generated'].append(response)
+
+    with st.chat_message("assistant"):
+        st.markdown(response)

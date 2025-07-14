@@ -8,3 +8,4 @@ langchain-experimental
 langgraph
 python-dotenv
 langchain-openai
+bs4
