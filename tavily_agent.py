@@ -3,6 +3,10 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 import os
 from dotenv import load_dotenv
+from langchain_core.messages import ToolMessage
+from langgraph.graph import MessagesState
+from typing import Optional
+from langchain_core.runnables import RunnableConfig
 
 # Load environment variables
 load_dotenv()
@@ -32,5 +36,20 @@ If you cannot find any relevant result, say you couldn’t find anything specifi
 internet_agent_executor = create_react_agent(
     model=llm,
     tools=[search_tool],
+    name="internet_agent",
     prompt=internet_agent_system_prompt
 )
+
+def internet_agent_node(state: MessagesState, config: Optional[RunnableConfig] = None) -> ToolMessage:
+    tool_call_id = None
+    for msg in state["messages"]:
+        tool_calls = getattr(msg, "tool_calls", None)
+        if tool_calls and len(tool_calls) > 0:
+            tool_call_id = tool_calls[0]["id"]
+            break
+
+    if not tool_call_id:
+        tool_call_id = "unknown"
+    result_message = internet_agent_executor.invoke(state, config=config) if config else internet_agent_executor.invoke(state)
+    content = getattr(result_message, "content", str(result_message))
+    return ToolMessage(tool_call_id=tool_call_id, content=content)

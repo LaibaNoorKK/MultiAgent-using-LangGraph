@@ -10,3 +10,7 @@ python-dotenv
 langchain-openai
 langchain_tavily
 bs4
+langchain-openai
+langgraph
+streamlit
+python-dotenv
