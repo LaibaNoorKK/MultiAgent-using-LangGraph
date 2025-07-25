@@ -14,3 +14,4 @@ langchain-openai
 langgraph
 streamlit
 python-dotenv
+langgraph_swarm
