@@ -15,3 +15,9 @@ langgraph
 streamlit
 python-dotenv
 langgraph_swarm
+fastapi
+uvicorn 
+pydantic
+flask
+langchain_postgres
+psycopg2-binary
