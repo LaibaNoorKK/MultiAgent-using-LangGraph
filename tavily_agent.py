@@ -7,11 +7,13 @@ from langchain_core.messages import ToolMessage
 from langgraph.graph import MessagesState
 from typing import Optional
 from langchain_core.runnables import RunnableConfig
-
+from datetime import date
+today = date.today().strftime("%B %d, %Y")
 # Load environment variables
 load_dotenv()
 tavily_key = os.getenv("TAVILY_API_KEY")
-
+print("LangSmith tracing enabled:", os.getenv("LANGCHAIN_TRACING_V2"))
+print("LangSmith project:", os.getenv("LANGCHAIN_PROJECT"))
 # Set Tavily key as an environment variable for the tool to work
 if tavily_key:
     os.environ["TAVILY_API_KEY"] = tavily_key
@@ -25,13 +27,13 @@ llm = ChatOpenAI(model="gpt-4.1", temperature=0.7)
 
 internet_agent_system_prompt = """
 You are an AI assistant that uses a search engine to provide up-to-date and accurate information from the internet.
+*IMPORTANT:* Today is {today}. Only provide admission deadlines that are in the future or visa up-to-date information only." 
 Always use the search tool to get the latest results. Be detailed, and cite relevant details found in the links.
 You need to answer the user query from all perspective. If it's about universities, you need to provide more details of universities not just the name.
 You need to provide the answer in a way that is helpful and informative for a student which is not in Malaysia, you need to very very helpful.
 You can take conversation history into account to answer the question.
 You need to always provide the source url from where the answer has been provided. Do not provide the url if those are already given with above data.
 You need to format the data in a way that is easy to read and understand. For example, add some bold headings, bullet points, or tables if necessary.
-If you cannot find any relevant result, say you couldn’t find anything specific.
 " *IMPORTANT:* Always end responses with helpful tips for international students and a follow-up question or suggestion to keep engagement flowing.\n\n"
 
 """
