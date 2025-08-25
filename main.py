@@ -85,14 +85,14 @@ if "active_session" not in st.session_state:
 
 # --- Sidebar: Chat Sessions ---
 st.sidebar.header("💬 Chat Sessions")
-if st.sidebar.button("➕ New Chat"):
+if st.sidebar.button("➕ New Chat", key="new_chat_btn"):
     st.session_state["active_session"] = str(uuid.uuid4())
 
 # Fetch chat sessions from DB
 chat_sessions = get_user_chat_sessions(USER_ID)
 for chat in chat_sessions:
     chat_title = chat["title"] or "(No title)"
-    if st.sidebar.button(chat_title):
+    if st.sidebar.button(chat_title, key=f"chat_{chat['session_id']}"):
         st.session_state["active_session"] = chat["session_id"]
 
 # Load history for active session
