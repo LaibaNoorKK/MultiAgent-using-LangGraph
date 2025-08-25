@@ -21,3 +21,10 @@ pydantic
 flask
 langchain_postgres
 psycopg2-binary
+pydantic[email]
+framer-motion
+lucide-react
+tailwindcss
+postcss
+autoprefixer
+react-router-dom
