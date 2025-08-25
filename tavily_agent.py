@@ -12,8 +12,7 @@ today = date.today().strftime("%B %d, %Y")
 # Load environment variables
 load_dotenv()
 tavily_key = os.getenv("TAVILY_API_KEY")
-print("LangSmith tracing enabled:", os.getenv("LANGCHAIN_TRACING_V2"))
-print("LangSmith project:", os.getenv("LANGCHAIN_PROJECT"))
+
 # Set Tavily key as an environment variable for the tool to work
 if tavily_key:
     os.environ["TAVILY_API_KEY"] = tavily_key
