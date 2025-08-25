@@ -28,12 +28,6 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-
-      - name: List all requirements.txt files in repo
-        run: find . -name "requirements.txt"
-      
-      - name: Show contents of root requirements.txt
-        run: cat requirements.txt
       
       - name: Install dependencies
         run: pip install -r requirements.txt
